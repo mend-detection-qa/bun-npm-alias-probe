@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "pm": "bun",
+  "pm_version_tested": "1.2.0",
+  "source_file": "bun.lock",
+  "generated_at": "2026-05-15T00:00:00+00:00",
+  "root": {
+    "name": "bun-npm-alias-probe",
+    "version": "0.1.0",
+    "dependencies": [
+      "my-lodash",
+      "old-lodash",
+      "hono"
+    ]
+  },
+  "packages": {
+    "my-lodash": {
+      "version": "4.17.21",
+      "source": "registry",
+      "group": "main",
+      "dependencies": [],
+      "source_detail": {
+        "registry": "https://registry.npmjs.org",
+        "alias_target": "lodash",
+        "alias_specifier": "npm:lodash@^4.17.0",
+        "resolved_version": "4.17.21"
+      }
+    },
+    "old-lodash": {
+      "version": "3.10.1",
+      "source": "registry",
+      "group": "main",
+      "dependencies": [],
+      "source_detail": {
+        "registry": "https://registry.npmjs.org",
+        "alias_target": "lodash",
+        "alias_specifier": "npm:lodash@3.10.1",
+        "resolved_version": "3.10.1"
+      }
+    },
+    "hono": {
+      "version": "4.7.11",
+      "source": "registry",
+      "group": "main",
+      "dependencies": [],
+      "source_detail": {
+        "registry": "https://registry.npmjs.org"
+      }
+    }
+  },
+  "project_metadata": {
+    "source_file": "bun.lock",
+    "groups": [
+      "main"
+    ]
+  },
+  "mend_behavior_prediction": {
+    "expected_direct_count": 3,
+    "expected_transitive_count": 0,
+    "expected_total_count": 3,
+    "alias_identity_preserved": true,
+    "notes": [
+      "Correct behavior: Mend reports three direct deps — 'my-lodash', 'old-lodash', 'hono'. The alias names are the install-time identities. 'lodash' should NOT appear as a package name.",
+      "Correct behavior: 'my-lodash' and 'old-lodash' are two distinct tree entries even though both resolve to the upstream package 'lodash'. They differ in alias name AND in resolved version.",
+      "Failure mode A (alias name collapsed): Mend strips the bun.lock tuple key and uses the first tuple element's package name ('lodash'). Result: tree shows 'lodash' instead of 'my-lodash'/'old-lodash'. Identity lost.",
+      "Failure mode B (merge to single entry): Two aliases to 'lodash' are collapsed into one 'lodash' node. Result: only 2 direct deps instead of 3, or a single 'lodash' entry that conflates both versions.",
+      "Failure mode C (version from wrong field): Mend reads the version from package.json specifier ('npm:lodash@^4.17.0') rather than the resolved tuple ('lodash@4.17.21'). Result: wrong version or unresolvable semver range reported.",
+      "Failure mode D (zero detection): Mend cannot parse Bun's JSONC lockfile format (tuple-based packages section). All packages dropped. Bun is not a named UA resolver — npm-resolver fallback may not understand Bun's tuple format."
+    ]
+  },
+  "warnings": [
+    "Bun is NOT a UA-supported resolver (js-bun is absent from the Mend install-tool list). Detection falls back to the npm resolver reading bun.lock. The npm resolver was designed for package-lock.json, whose packages section uses object-per-package rather than Bun's tuple format.",
+    "ALIAS IDENTITY CONTRACT: The dep tree MUST report aliases by their ALIAS NAME ('my-lodash', 'old-lodash'), NOT by the upstream package name ('lodash'). The alias name is the install-time identity — it is what lives in node_modules/ and what dependents import.",
+    "TWO DISTINCT ENTRIES CONTRACT: 'my-lodash@4.17.21' and 'old-lodash@3.10.1' are two separate direct dependencies. They must appear as two separate nodes in the dep tree. Collapsing them into a single 'lodash' node is incorrect and loses the version distinction.",
+    "VERSION CONTRACT: The resolved version for each alias entry must come from the tuple ('lodash@4.17.21'), not from the semver specifier in package.json ('^4.17.0'). A parser that extracts the range instead of the resolved version will produce incorrect output.",
+    "HONO CONTROL: 'hono@4.7.11' is a plain (non-aliased) registry dep included as a control. If Mend misdetects it, the aliasing logic is not the only broken path."
+  ]
+}
