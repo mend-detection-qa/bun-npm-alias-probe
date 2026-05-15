@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "my-lodash": "npm:lodash@^4.17.0",
-    "old-lodash": "npm:lodash@3.10.1",
+    "old-lodash": "npm:lodash@4.17.21",
     "hono": "^4.12.0"
   }
 }
